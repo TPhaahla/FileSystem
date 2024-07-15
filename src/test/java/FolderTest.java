@@ -38,6 +38,25 @@ class FolderTest {
     }
 
     /**
+     * Tests the copy constructor and verifies that the new Folder object is the same
+     * as the one passed as a parameter in the Constructor.
+     */
+    @Test
+    void testCopyConstructor() {
+        Folder copiedFolder = new Folder(subFolder);
+
+        assertEquals(subFolder.getName(), copiedFolder.getName());
+        assertEquals(subFolder.getParent(), copiedFolder.getParent());
+
+        // Check that the List of files have the same values but is not the same object.
+        assertNotSame(subFolder.getFiles(), copiedFolder.getFiles());
+        assertArrayEquals(subFolder.getFiles().toArray(), copiedFolder.getFiles().toArray());
+
+        // Check that the List of folders have the same values but is not the same object.
+        assertNotSame(subFolder.getFolders(), copiedFolder.getFolders());
+        assertArrayEquals(subFolder.getFolders().toArray(), copiedFolder.getFolders().toArray());
+    }
+    /**
      * Tests that the getName() method of the File class returns the expected folder name instantiated in this class.
      * The root folder is used in this test.
      */
@@ -81,7 +100,7 @@ class FolderTest {
 
     /**
      * Tests that the setParent() method of the Folder class allows for the parent of the Folder object to be set to null.
-     * This means the Folder object would now be considered to be in the root directory.
+     * This means the Folder object would now be considered to be a root or standalone directory.
      */
     @Test
     void testSetParentToNull() {
@@ -180,20 +199,33 @@ class FolderTest {
     }
 
     /**
-     * Tests adding a sub-folder to a folder.
-     * Verifies that the folder list contains the added sub-folder.
+     * Tests adding a subfolder to a folder indirectly.
+     * Verifies that the folder list contains the newly created local Folder in it's sub-folder.
      */
     @Test
-    void testAddFolder() {
+    void testAddFolderIndirectly() {
         String folderName = "newFolder";
         Folder newFolderToAdd = new Folder(folderName, rootFolder);
         List<Folder> folders = rootFolder.getFolders();
         assertEquals(3, folders.size());
         assertTrue(rootFolder.containsFolderWithSameName(folderName));
+        assertTrue(rootFolder.containsFolder(newFolderToAdd));
     }
 
     /**
-     * Tests adding a file to a folder.
+     * Tests adding a subfolder to a folder directly, using the addFile() method of the Folder class.
+     * Verifies that the subfolder contains the newly added folder.
+     */
+    @Test
+    void testAddFolderDirectly() {
+        String folderName = "newFolder";
+        Folder newFolder = new Folder(folderName, null);
+        subFolder.addFolder(newFolder);
+        assertTrue(subFolder.containsFolder(newFolder));
+    }
+
+    /**
+     * Tests adding a file to a folder, using the addFile() method of the Folder class.
      * Verifies that the file list contains the added file.
      */
     @Test
@@ -248,14 +280,21 @@ class FolderTest {
         assertFalse(subFolder.containsFolderWithSameName(subFolderName));
     }
 
+    /**
+     * Tests the isParent() method of the Folder class.
+     * Verifies that the rootFolder is a parent of the subFolder and that the reverse is not true.
+     */
     @Test
     void testIsParentOf() {
         assertTrue(rootFolder.isParentOf(subFolder));
         assertFalse(subFolder.isParentOf(rootFolder));
     }
 
+    /**
+     * Tests and verifies that the root folder cannot have its parent set to one if it's subfolders.
+     */
     @Test
-    void testSetParentToSubFolderNotAllowed() {
+    void testSetParentOfRootToSubFolderNotAllowed() {
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
             rootFolder.setParent(subFolder);
             assertNull(rootFolder.getParent());
@@ -263,10 +302,29 @@ class FolderTest {
         assertEquals("Cannot set parent of a root folder to any of its subfolders.", exception.getMessage());
     }
 
+    /**
+     * Tests and verifies that a file cannot be added to a folder if the folder contains a file with the same name and extension.
+     */
+    @Test
+    void testAddFileWithSameNameAndExtensionNotAllowed() {
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            File newFile = new File(fileName1, null, fileSize, createdDate, fileContent, fileExtension );
+            rootFolder.addFile(newFile);
+            assertFalse(rootFolder.containsFile(newFile));
+        });
+        assertEquals("A file with the name \"testFile1\" and extension \"txt\" already exists in this folder.", exception.getMessage());
+    }
 
-
-
-
-
+    /**
+     * Tests and verifies that a folder cannot be added to a folder if it has the same name as another folder in that folder.
+     */
+    @Test
+    void testAddFolderWithSameNameNotAllowed() {
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            Folder newFolder = new Folder(subFolderName, null);
+            rootFolder.addFolder(newFolder);
+        });
+        assertEquals("A folder with the name \"subFolder\" already exists in this folder.", exception.getMessage());
+    }
 
 }

@@ -25,12 +25,35 @@ class FileTest {
     }
 
     /**
+     * Tests the copy constructor and verifies that the new File object is the same
+     * as the one passed as a parameter in the Constructor.
+     */
+    @Test
+    void testCopyConstructor() {
+        File copiedFile = new File(file);
+
+        assertEquals(file.getName(), copiedFile.getName());
+        assertEquals(file.getParent(), copiedFile.getParent());
+        assertEquals(file.getSize(), copiedFile.getSize());
+        assertEquals(file.getExtension(), copiedFile.getExtension());
+
+        // Check that the created date has the same value but is not the same object.
+        assertNotSame(file.getCreatedDate(), copiedFile.getCreatedDate());
+        assertEquals(file.getCreatedDate().getTime(), copiedFile.getCreatedDate().getTime());
+
+        // Check that the file content has the same value but is not the same object.
+        assertNotSame(file.getContent(), copiedFile.getContent());
+        assertArrayEquals(file.getContent(), copiedFile.getContent());
+    }
+
+    /**
      * Tests that when an object of the File class is created, it can be found in its parent Folder.
      */
     @Test
     void testFileObjectIsFoundInParent() {
         assertTrue(parentFolder.containsFile(file));
         assertTrue(parentFolder.containsFile(file2));
+
     }
 
     /**
@@ -158,8 +181,6 @@ class FileTest {
     @Test
     void testSetNameToSameNameWithDifferentExtensionAllowed() {
         File file3 = new File("anotherFile", parentFolder, fileSize, createdDate, fileContent, "doc");
-        parentFolder.addFile(file3);
-
         assertDoesNotThrow(() -> {
             file3.setName(fileName);
         });
