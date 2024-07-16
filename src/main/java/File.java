@@ -1,5 +1,6 @@
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * @author Tshiamo
@@ -72,5 +73,18 @@ public class File extends FileSystemEntity {
             throw new IllegalArgumentException("A file with the name \""+name+"\" and extension \"" +this.extension+"\" already exists in the parent folder.");
         }
         super.setName(name);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        File file = (File) o;
+        return size == file.size && Objects.equals(getName(), file.getName()) && Objects.equals(extension, file.extension);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getName(), getSize(), getExtension());
     }
 }
