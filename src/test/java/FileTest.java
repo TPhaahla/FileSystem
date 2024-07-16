@@ -15,6 +15,9 @@ class FileTest {
     private final String fileExtension = "txt";
     private final Date createdDate = new Date();
 
+    private File newFile1;
+    private File newFile2;
+
     /**
      * Set up the test environment before each test.
     */
@@ -22,6 +25,11 @@ class FileTest {
     void setUp() {
         file = new File(fileName, parentFolder, fileSize, createdDate, fileContent, fileExtension);
         file2 = new File(fileName1, parentFolder, fileSize, createdDate, fileContent, fileExtension);
+
+//        Setup Files for overridden equals method tests.
+        newFile1 = new File(fileName, null, fileSize, createdDate, fileContent, fileExtension);
+        Folder subFolder = new Folder("subFolder", parentFolder);
+        newFile2 = new File(fileName,subFolder, fileSize, createdDate, fileContent, fileExtension );
     }
 
     /**
@@ -219,5 +227,56 @@ class FileTest {
             File standAloneFile = new File(fileName, null, fileSize, createdDate, fileContent, fileExtension);
             assertNull(standAloneFile.getParent());
         });
+    }
+
+    // Tests for overridden equals method in the File Class.
+    @Test
+    public void testEqualsReflexive() {
+        assertEquals(file, file);
+    }
+
+    @Test
+    public void testEqualsSymmetric() {
+        assertEquals(file, newFile1);
+        assertEquals(newFile1, file);
+    }
+
+    @Test
+    public void testEqualsTransitive() {
+        assertEquals(file, newFile1);
+        assertEquals(newFile1, newFile2);
+        assertEquals(file, newFile2);
+    }
+
+    @Test
+    public void testEqualsConsistent() {
+        assertEquals(file, newFile1);
+        assertEquals(file, newFile1);
+    }
+
+    @Test
+    public void testEqualsNull() {
+        assertNotEquals(file, null);
+    }
+
+    @Test
+    public void testEqualsDifferentType() {
+        assertNotEquals(file, new Object());
+    }
+
+    @Test
+    public void testHashCodeConsistent() {
+        assertEquals(file.hashCode(), file.hashCode());
+    }
+
+    @Test
+    public void testHashCodeEqualObjects() {
+        assertEquals(file.hashCode(), newFile1.hashCode());
+    }
+
+    @Test
+    public void testHashCodeDifferentObjects() {
+        File differentFile = file2;
+        assertNotEquals(file.hashCode(), differentFile.hashCode());
     }
 }
