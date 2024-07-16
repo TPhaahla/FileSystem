@@ -158,7 +158,11 @@ public class FileSystemManager {
         if (f == null || d == null) {
             throw new IllegalArgumentException("Folder parameters cannot be null.");
         }
-        copyFolder(f, d);
-        deleteFolder(f);
+        if(f.isParentOf(d)) {
+            throw new IllegalStateException("Illegal operation: Cannot move a folder into its subfolder.");
+        } else {
+            copyFolder(f, d);
+            deleteFolder(f);
+        }
     }
 }

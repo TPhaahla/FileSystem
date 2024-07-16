@@ -482,5 +482,15 @@ class FileSystemManagerTest {
         assertNull(newFolder.getParent());
     }
 
+    /**
+     *
+     */
+    @Test
+    void testMoveRootToSubFolderNotAllowed() {
+        Exception exception = assertThrows(IllegalStateException.class, ()-> {
+            fileSystemManager.moveFolder(root, rootSubFolder);
+        });
+        assertEquals("Illegal operation: Cannot move a folder into its subfolder.", exception.getMessage());
+    }
 
 }
